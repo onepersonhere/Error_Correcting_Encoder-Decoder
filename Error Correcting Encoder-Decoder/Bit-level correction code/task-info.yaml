@@ -343,6 +343,17 @@ files:
     }
 
   learner_created: false
+- name: src/correcter/send.txt
+  visible: true
+  text: Simple text.
+  learner_created: true
+- name: src/correcter/received.txt
+  visible: true
+  learner_created: true
+- name: received.txt
+  visible: true
+  text: "%%$9\x116r(v159\00\x1249<w!\"sv\x15>\x15)7$%3\x15%"
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/58/stages/315/implement#comment
 status: Unchecked
 record: -1
