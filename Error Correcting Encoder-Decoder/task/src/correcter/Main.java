@@ -185,7 +185,18 @@ public class Main {
             }
         }
         //for last
-        sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
+        if(sArr[sArr.length - 1].charAt(4) == '.') {
+            sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
+        }else{
+            int char1 = Character.getNumericValue(sArr[sArr.length - 1].charAt(0));
+            int char2 = Character.getNumericValue(sArr[sArr.length - 1].charAt(2));
+            int char3 = Character.getNumericValue(sArr[sArr.length - 1].charAt(4));
+            if((char1 + char2 + char3) % 2 == 0) {
+                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
+            }else if((char1 + char2 + char3) % 2 == 1){
+                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '1');
+            }
+        }
         exp = String.join(" ", Arrays.asList(sArr));
         return exp;
     }
@@ -208,8 +219,28 @@ public class Main {
             e.printStackTrace();
         }
     }
+    static String binToByte(String bin){
+        String[] binArr = bin.split(" ");
+        String[] byteArr = new String[binArr.length];
+        for(int i = 0; i < binArr.length; i++){
+            int b = Integer.parseInt(binArr[i], 2);
+            byteArr[i] = Integer.toString(b);
+        }
+        //System.out.println(String.join(" ", Arrays.asList(byteArr)));
+        return String.join(" ", Arrays.asList(byteArr));
+    }
+    static String byteToBin(String Byte){
+        String[] byteArr = Byte.split(" ");
+        String[] binArr = new String[byteArr.length];
+        for(int i = 0; i <byteArr.length; i++){
+            int n = Integer.parseInt(byteArr[i]);
+            String s1 = String.format("%8s", Integer.toBinaryString(n & 0xFF)).replace(' ', '0');
+            binArr[i] = s1;
+        }
+        return String.join(" ", Arrays.asList(binArr));
+    }
     static void encode(){
-        String data = fileExtract("send.txt");
+        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\send.txt");
         System.out.println("send.txt:");
         System.out.println("text view: " + data);
 
@@ -230,11 +261,12 @@ public class Main {
         String hex = bintoHex(par);
         System.out.println("hex view: " + hex);
 
-        String str = par;
+        String str = binToByte(par); //convert to byte
         fileWrite("encoded.txt", str);
     }
     static void send(){
-        String data = fileExtract("encoded.txt");
+        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\encoded.txt");
+        data = byteToBin(data);
 
         System.out.println("encoded.txt:");
         String hex = bintoHex(data);
@@ -249,6 +281,7 @@ public class Main {
         hex = bintoHex(data);
         System.out.println("hex view: " + hex);
 
+        data = binToByte(data);
         fileWrite("received.txt", data);
     }
     static String correction(String data){
@@ -352,9 +385,10 @@ public class Main {
         return sb.toString();
     }
     static void decode(){
-        String data = fileExtract("received.txt");
-        System.out.println("received.txt:");
+        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\received.txt");
+        data = byteToBin(data);
 
+        System.out.println("received.txt:");
         String hex = bintoHex(data);
         System.out.println("hex view: " + hex);
         System.out.println("bin view: " + data);
