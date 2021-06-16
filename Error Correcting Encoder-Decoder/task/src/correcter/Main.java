@@ -3,9 +3,7 @@ package correcter;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.StringJoiner;
+import java.util.*;
 
 
 public class Main {
@@ -153,72 +151,103 @@ public class Main {
         return s;
     }
     static String expand(String s){
+        //expand in grp of 4, 1st at pos 3, 3 at pos 5-7
         //remove the spaces
         String[] sArr = s.split(" ");
         s = String.join("", Arrays.asList(sArr));
         //System.out.println(s);
 
         String exp = "";
-        for(int i = 1; i <= s.length(); i++){
-            int idx = i - 1;
-            if(i % 3 == 0){
-                exp += s.charAt(idx);
-                exp += s.charAt(idx);
-                exp += ".. ";
-            }else{
-                exp += s.charAt(idx);
-                exp += s.charAt(idx);
-            }
+        for(int i = 0; i < s.length(); i+=4){
+            exp += "..";
+            exp += s.charAt(i);
+            exp += ".";
+            exp += s.charAt(i + 1);
+            exp += s.charAt(i + 2);
+            exp += s.charAt(i + 3);
+            exp += ". ";
         }
-        sArr = exp.split(" ");
-        //last arr
-        int n = sArr[sArr.length - 1].length();
-        if(n < 8){
-            for(int i = 0; i < 8 - n; i++){
-                sArr[sArr.length - 1] += ".";
-            }
-        }
-        exp = String.join(" ", Arrays.asList(sArr));
         return exp;
     }
     static String parity(String exp){
+        //p1 check one bit, skip one bit
+        //p2 check 2 bit, skip 2
+        //p4 check 4 bit, skip 4
+        //1 if total num of 1 is odd
+        //0 if even
+        //p8 is always 0
         String[] sArr = exp.split(" ");
-        //for all except last
-        for(int i = 0; i < sArr.length - 1; i++){
-            for(int j = 0; j < 8; j+=2){
-                if(sArr[i].charAt(j) == '.'){
-                    int char1 = Character.getNumericValue(sArr[i].charAt(j - 2));
-                    int char2 = Character.getNumericValue(sArr[i].charAt(j - 4));
-                    int char3 = Character.getNumericValue(sArr[i].charAt(j - 6));
-                    if((char1 + char2 + char3) % 2 == 0) {
-                        sArr[i] = sArr[i].replace('.', '0');
-                    }else if((char1 + char2 + char3) % 2 == 1){
-                        sArr[i] = sArr[i].replace('.', '1');
-                    }
-                }
+        String[] newArr = new String[sArr.length];
+
+        for(int i = 0; i < sArr.length; i++){
+            char[] ch = new char[8];
+
+            //for p1 -> charAt(0)
+            int numof1 = 0;
+
+            if(sArr[i].charAt(2) == '1'){
+                numof1++;
             }
-        }
-        //for last
-        if(sArr[sArr.length - 1].charAt(4) == '.') {
-            int char1 = Character.getNumericValue(sArr[sArr.length - 1].charAt(0));
-            int char2 = Character.getNumericValue(sArr[sArr.length - 1].charAt(2));
-            if((char1 + char2) % 2 == 0){
-                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
-            }else{
-                sArr[sArr.length - 1] = "00110011";
+            if(sArr[i].charAt(4) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
             }
 
-        }else{
-            int char1 = Character.getNumericValue(sArr[sArr.length - 1].charAt(0));
-            int char2 = Character.getNumericValue(sArr[sArr.length - 1].charAt(2));
-            int char3 = Character.getNumericValue(sArr[sArr.length - 1].charAt(4));
-            if((char1 + char2 + char3) % 2 == 0) {
-                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
-            }else if((char1 + char2 + char3) % 2 == 1){
-                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '1');
+            if(numof1 % 2 ==0){
+                ch[0] = '0';
+            }else{
+                ch[0] = '1';
             }
+
+            //for p2
+            numof1 = 0;
+
+            if(sArr[i].charAt(2) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(5) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
+            }
+
+            if(numof1 % 2 ==0){
+                ch[1] = '0';
+            }else{
+                ch[1] = '1';
+            }
+            //p3
+            ch[2] += sArr[i].charAt(2);
+
+            //for p4
+            numof1 = 0;
+            if(sArr[i].charAt(4) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(5) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
+            }
+            if(numof1 % 2 ==0){
+                ch[3] = '0';
+            }else{
+                ch[3] = '1';
+            }
+
+            //p5,6,7.. the rest
+            ch[4] = sArr[i].charAt(4);
+            ch[5] = sArr[i].charAt(5);
+            ch[6] = sArr[i].charAt(6);
+            ch[7] = '0';
+            String CH = new String(ch);
+            newArr[i] = CH;
         }
-        exp = String.join(" ", Arrays.asList(sArr));
+        exp = String.join(" ", Arrays.asList(newArr));
         return exp;
     }
     static String bintoHex(String bin){
@@ -317,84 +346,130 @@ public class Main {
         fileWrite("received.txt", bata);
     }
     static String correction(String data){
+        //p1 check one bit, skip one bit
+        //p2 check 2 bit, skip 2
+        //p4 check 4 bit, skip 4
+        //1 if total num of 1 is odd
+        //0 if even
+        //bad bit = when p1 or p2 doesn't add up -> p1 + p2 == bad bit pos
+        //p8 is always 0
         String[] sArr = data.split(" ");
         String[] correctArr = new String[sArr.length];
 
         for(int i = 0; i < sArr.length; i++){
-            for(int j = 0; j < 8; j+=2){
-                //find pair with error
-                char[] cArr = new char[8];
-                for(int k = 0; k < 8; k++){
-                    cArr[k] = sArr[i].charAt(k);
-                }
-                int errIdx = 0;
-                boolean found = false;
-                if(sArr[i].charAt(j) != sArr[i].charAt(j+1)){
-                    errIdx = j;
-                    found = true;
-                }
-                //if error inside data pairs aka 0 <= j < 6, change
-                if(errIdx < 6 && found){
-                    // if x = even, x = 0, x = odd, x = 1
-                    int charend = Character.getNumericValue(sArr[i].charAt(6));
-                    int char1, char2;
-                    if(errIdx < 2) {
-                        char1 = Character.getNumericValue(sArr[i].charAt(2));
-                        char2 = Character.getNumericValue(sArr[i].charAt(4));
-                    }else if(errIdx < 4) {
-                        char1 = Character.getNumericValue(sArr[i].charAt(0));
-                        char2 = Character.getNumericValue(sArr[i].charAt(4));
-                    }else{
-                        char1 = Character.getNumericValue(sArr[i].charAt(0));
-                        char2 = Character.getNumericValue(sArr[i].charAt(2));
-                    }
-                    int num = char1 + char2;
-                    //System.out.println(charend == 0);
-                    if(charend == 0){
-                        if(num % 2 == 0){
-                            cArr[errIdx] = '0';
-                            cArr[errIdx + 1] = '0';
-                        }else{
-                            cArr[errIdx] = '1';
-                            cArr[errIdx + 1] = '1';
-                        }
-                    }else{
-                        if(num % 2 == 0){
-                            cArr[errIdx] = '1';
-                            cArr[errIdx + 1] = '1';
-                        }else{
-                            cArr[errIdx] = '0';
-                            cArr[errIdx + 1] = '0';
-                        }
-                    }
-                    correctArr[i] = new String(cArr);
-                }else if(errIdx >= 6 && found){ //ignore parity pair
-                    correctArr[i] = sArr[i];
+            char[] c = sArr[i].toCharArray();
+            List<Integer> ch = new ArrayList<Integer>();
+            //p1
+            int numof1 = 0;
+            if(sArr[i].charAt(2) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(4) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
+            }
+            if(numof1 % 2 == 0 && sArr[i].charAt(0) == '0'){
+
+            }else if(numof1 % 2 != 0 && sArr[i].charAt(0) == '1'){
+
+            }else{
+                ch.add(1);
+            }
+            numof1 = 0;
+            //p2
+            if(sArr[i].charAt(2) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(5) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
+            }
+            if(numof1 % 2 == 0 && sArr[i].charAt(1) == '0'){
+
+            }else if(numof1 % 2 != 0 && sArr[i].charAt(1) == '1'){
+
+            }else{
+                ch.add(2);
+            }
+            numof1 = 0;
+            //p4
+            if(sArr[i].charAt(4) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(5) == '1'){
+                numof1++;
+            }
+            if(sArr[i].charAt(6) == '1'){
+                numof1++;
+            }
+            if(numof1 % 2 == 0 && sArr[i].charAt(3) == '0'){
+
+            }else if(numof1 % 2 != 0 && sArr[i].charAt(3) == '1'){
+
+            }else{
+                ch.add(4);
+            }
+            //p8
+            if(sArr[i].charAt(7) != '0'){
+                c[7] = '0';
+            }
+            //find bad arr:
+            int[] arr = ch.stream().mapToInt(n->n).toArray();
+            System.out.println(Arrays.toString(arr));
+            if(arr.length == 3) {
+                int badbitidx = arr[0] + arr[1] + arr[2] - 1;
+                if(sArr[i].charAt(badbitidx) == '0'){
+                    c[badbitidx] = '1';
+                }else if(sArr[i].charAt(badbitidx) == '1'){
+                    c[badbitidx] = '0';
                 }
             }
+            if(arr.length == 2) {
+                int badbitidx = arr[0] + arr[1] - 1;
+                if(sArr[i].charAt(badbitidx) == '0'){
+                    c[badbitidx] = '1';
+                }else if(sArr[i].charAt(badbitidx) == '1'){
+                    c[badbitidx] = '0';
+                }
+            }
+            else if(arr.length == 1){
+                int badbitidx = arr[0] - 1;
+                if(sArr[i].charAt(badbitidx) == '0'){
+                    c[badbitidx] = '1';
+                }else if(sArr[i].charAt(badbitidx) == '1'){
+                    c[badbitidx] = '0';
+                }
+            }
+
+            String cc = new String(c);
+            correctArr[i] = cc;
         }
         String correct = String.join(" ", Arrays.asList(correctArr));
         return correct;
     }
     static String decod(String correct){
         String[] correctArr = correct.split(" ");
-        String c = String.join("", Arrays.asList(correctArr));
-        String decode = "";
-        int count = 0, addedcount = 0;
-        for(int i = 0; i < c.length(); i+=2){
+        String[] decode = new String[correctArr.length/2];
+        int count = 0;
+        for(int i = 0; i < correctArr.length; i+=2){
+            String s = "";
+            s += correctArr[i].charAt(2);
+            s += correctArr[i].charAt(4);
+            s += correctArr[i].charAt(5);
+            s += correctArr[i].charAt(6);
+            s += correctArr[i + 1].charAt(2);
+            s += correctArr[i + 1].charAt(4);
+            s += correctArr[i + 1].charAt(5);
+            s += correctArr[i + 1].charAt(6);
+            decode[count] = s;
             count++;
-            if(count < 4) {
-                decode += c.charAt(i);
-                addedcount++;
-            }else{
-                count = 0;
-            }
-            if(addedcount == 8){
-                decode += " ";
-                addedcount = 0;
-            }
         }
-        return decode;
+        String c = String.join(" ", Arrays.asList(decode));
+        return c;
     }
     static String remove(String decode){
         String[] arr = decode.split(" ");
@@ -434,10 +509,10 @@ public class Main {
         String decode = decod(correct);
         System.out.println("decode: " + decode);
 
-        String remove = remove(decode);
-        System.out.println("remove: " + remove);
+        //String remove = remove(decode);
+        //System.out.println("remove: " + remove);
 
-        hex = bintoHex(remove);
+        hex = bintoHex(decode);
         System.out.println("hex view: " + hex);
 
         String text = hextoText(hex);
