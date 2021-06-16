@@ -343,6 +343,24 @@ files:
     }
 
   learner_created: false
+- name: src/correcter/send.txt
+  visible: true
+  text: Eat more of these french buns!
+  learner_created: true
+- name: decoded.txt
+  visible: true
+  text: 5548172 6548 225147 23656595 5155
+  learner_created: true
+- name: encoded.txt
+  visible: true
+  text: "\x0f�3<3���\x0f�\0<\0���\x0f��3\0\0��\x0f�3<3\0�\0\x0f\0\0<\x0f\0�3\x0f�\
+    3<\0���\x0f��3\0\0�3\x0f��<<\0��\x0f��<3��\x0f\x0f�33\0\0��\x0f�3<3���"
+  learner_created: true
+- name: received.txt
+  visible: true
+  text: "\x0e�#,s���\v�\x01| ���\x0e��7\b\x01��\n�;>;\x04�\x10\a\x02\x01=\a\x10�\x13\
+    \x1f�2|\x10���\x0e��;@\b�7\x0eǰ=\x1c\x10��/��\x1c;ǿOO�77@\x04��\a�181���"
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/58/stages/316/implement#comment
 status: Unchecked
 record: -1

@@ -1,15 +1,15 @@
 package correcter;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.StringJoiner;
 
+
 public class Main {
+
     static String tripleCharErrorEmulator(String input){
         String errormsg = new String();
 
@@ -107,7 +107,21 @@ public class Main {
         //s = new String(byteArr, StandardCharsets.UTF_8);
         return s;
     }
-    static String fileExtract(String filename){
+    static byte[] fileExtract(String filename){
+        //to read file
+        byte[] data = new byte[4096];
+        try {
+            File rFile = new File(filename);
+            data = Files.readAllBytes(rFile.toPath());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+    static String textfileExtract(String filename){
         //to read file
         String data = "";
         try {
@@ -186,7 +200,14 @@ public class Main {
         }
         //for last
         if(sArr[sArr.length - 1].charAt(4) == '.') {
-            sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
+            int char1 = Character.getNumericValue(sArr[sArr.length - 1].charAt(0));
+            int char2 = Character.getNumericValue(sArr[sArr.length - 1].charAt(2));
+            if((char1 + char2) % 2 == 0){
+                sArr[sArr.length - 1] = sArr[sArr.length - 1].replace('.', '0');
+            }else{
+                sArr[sArr.length - 1] = "00110011";
+            }
+
         }else{
             int char1 = Character.getNumericValue(sArr[sArr.length - 1].charAt(0));
             int char2 = Character.getNumericValue(sArr[sArr.length - 1].charAt(2));
@@ -209,38 +230,49 @@ public class Main {
         }
         return hex;
     }
-    static void fileWrite(String filename, String str){
-        try{
-            FileWriter wFile = new FileWriter(filename);
-            wFile.write(str);
-            wFile.close();
-        }catch (IOException e){
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+    static void fileWrite(String filename, byte[] bytes){
+        try {
+
+            // Initialize a pointer
+            // in file using OutputStream
+            OutputStream
+                    os
+                    = new FileOutputStream(filename);
+
+            // Starts writing the bytes in it
+            os.write(bytes);
+            //System.out.println("Successfully"
+            //        + " byte inserted");
+
+            // Close the file
+            os.close();
+        }
+
+        catch (Exception e) {
+            System.out.println("Exception: " + e);
         }
     }
-    static String binToByte(String bin){
+    static byte[] binToByte(String bin){
         String[] binArr = bin.split(" ");
-        String[] byteArr = new String[binArr.length];
+        byte[] byteArr = new byte[binArr.length];
         for(int i = 0; i < binArr.length; i++){
             int b = Integer.parseInt(binArr[i], 2);
-            byteArr[i] = Integer.toString(b);
+            byteArr[i] = (byte) b;
         }
-        //System.out.println(String.join(" ", Arrays.asList(byteArr)));
-        return String.join(" ", Arrays.asList(byteArr));
+
+        return byteArr;
     }
-    static String byteToBin(String Byte){
-        String[] byteArr = Byte.split(" ");
+    static String byteToBin(byte[] byteArr){
         String[] binArr = new String[byteArr.length];
         for(int i = 0; i <byteArr.length; i++){
-            int n = Integer.parseInt(byteArr[i]);
+            int n = Integer.parseInt(String.valueOf(byteArr[i]));
             String s1 = String.format("%8s", Integer.toBinaryString(n & 0xFF)).replace(' ', '0');
             binArr[i] = s1;
         }
         return String.join(" ", Arrays.asList(binArr));
     }
     static void encode(){
-        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\send.txt");
+        String data = textfileExtract("send.txt");
         System.out.println("send.txt:");
         System.out.println("text view: " + data);
 
@@ -261,12 +293,12 @@ public class Main {
         String hex = bintoHex(par);
         System.out.println("hex view: " + hex);
 
-        String str = binToByte(par); //convert to byte
+        byte[] str = binToByte(par); //convert to byte
         fileWrite("encoded.txt", str);
     }
     static void send(){
-        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\encoded.txt");
-        data = byteToBin(data);
+        byte[] bata = fileExtract("encoded.txt");
+        String data = byteToBin(bata);
 
         System.out.println("encoded.txt:");
         String hex = bintoHex(data);
@@ -281,8 +313,8 @@ public class Main {
         hex = bintoHex(data);
         System.out.println("hex view: " + hex);
 
-        data = binToByte(data);
-        fileWrite("received.txt", data);
+        bata = binToByte(data);
+        fileWrite("received.txt", bata);
     }
     static String correction(String data){
         String[] sArr = data.split(" ");
@@ -385,8 +417,8 @@ public class Main {
         return sb.toString();
     }
     static void decode(){
-        String data = fileExtract("C:\\Users\\wh\\IdeaProjects\\Error Correcting Encoder-Decoder\\received.txt");
-        data = byteToBin(data);
+        byte[] bata = fileExtract("received.txt");
+        String data = byteToBin(bata);
 
         System.out.println("received.txt:");
         String hex = bintoHex(data);
@@ -411,25 +443,35 @@ public class Main {
         String text = hextoText(hex);
         System.out.println("text view: " + text);
 
-        fileWrite("decoded.txt", text);
+        textfileWrite("decoded.txt", text);
+    }
+    static void textfileWrite(String filename, String str){
+        try{
+            FileWriter wFile = new FileWriter(filename);
+            wFile.write(str);
+            wFile.close();
+        }catch (IOException e){
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
-        String input = scan.nextLine();
+        //while(true) {
+            Scanner scan = new Scanner(System.in);
+            String input = scan.nextLine();
 
-        String errormsg = "";
-        
-        if(input.equalsIgnoreCase("encode")){
-            encode();
-        }
-        if(input.equalsIgnoreCase("send")){
-            send();
-        }
-        if(input.equalsIgnoreCase("decode")){
-            decode();
-        }
-
-
-        System.out.println(errormsg);
+            if (input.equalsIgnoreCase("encode")) {
+                encode();
+            }
+            if (input.equalsIgnoreCase("send")) {
+                send();
+            }
+            if (input.equalsIgnoreCase("decode")) {
+                decode();
+            }
+            //if(input.equalsIgnoreCase("stop")){
+            //    break;
+            //}
+        //}
     }
 }
